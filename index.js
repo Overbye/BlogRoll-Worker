@@ -41,8 +41,8 @@ const opmlXmlContentEd = "\n  </body>\n</opml>";
 // 解析 README 中的表格，转为 JSON
 const pattern =
   /\| *([^\|]*) *\| *(http[^\|]*) *\| *([^\|\n]*) *\| *([^\| \n]*) *\| *([^\| \n]*) *\| *([^\| \n]*) *\|\n/g;
+  // /\| *([^\|]*) *\| *(http[^\|]*) *\| *([^\|\n]*) *\| *([^\| \n]*) *\| *([^\| \n]*) *\| *([^\| \n]*) *\|/g;
 const readmeMdContent = fs.readFileSync(readmeMdPath, { encoding: "utf-8" });
-console.log(readmeMdContent)
 
 const metaJson = [];
 let resultArray;
@@ -172,9 +172,11 @@ async function fetchWithTimeout(resource, options = {}) {
       dataJson.push.apply(
         dataJson,
         feed.items
-          .filter((item) => item.title && item.content && item.pubDate)
+          .filter((item) => item.title)
           .map((item) => {
-            const pubDate = new Date(item.pubDate);
+            // console.log(item)
+            const pubDate = new Date(item.pubDate ?? item.published);
+            // console.log(pubDate);
             return {
               name: lineJson.title,
               xmlUrl: lineJson.xmlUrl,
