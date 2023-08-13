@@ -42,6 +42,7 @@ const opmlXmlContentEd = "\n  </body>\n</opml>";
 const pattern =
   /\| *([^\|]*) *\| *(http[^\|]*) *\| *([^\|\n]*) *\| *([^\| \n]*) *\| *([^\| \n]*) *\| *([^\| \n]*) *\|\n/g;
 const readmeMdContent = fs.readFileSync(readmeMdPath, { encoding: "utf-8" });
+console.log(readmeMdContent)
 
 const metaJson = [];
 let resultArray;
