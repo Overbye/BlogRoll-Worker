@@ -1,4 +1,4 @@
-# TODO: 需修改的配置，用于上传到 CloudFlare
+# TODO: 需修改的配置，用于上传到 CloudFlare.
 name = "blogroll"
 type = "webpack"
 account_id = "0de7ad47f547afcaca7575c5c24ad560"
