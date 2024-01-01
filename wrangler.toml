@@ -1,10 +1,10 @@
 # TODO: 需修改的配置，用于上传到 CloudFlare
 name = "blogroll"
 type = "webpack"
-account_id = "ed02115b0333e518a62d649ee291264b"
+account_id = "0de7ad47f547afcaca7575c5c24ad560"
 workers_dev = true
-# route = "blogroll.icl.moe/*"
-zone_id = "374cfa163417e4f4a64edb66a0ddc218"
+# route = "blogroll.axz.me/*"
+zone_id = "dac67509f8ab93320c00b66daad8d897"
 
 [site]
 bucket = "./web/dist"
