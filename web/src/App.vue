@@ -14,7 +14,7 @@ import opmlJson from "./assets/opml.json";
       <a
         id="logo-right"
         target="_blank"
-        href="https://github.com/idealclover/blogroll"
+        href="https://github.com/Overbye/BlogRoll-Worker"
       >
         <img id="logo-github" src="./assets/github.png" alt="Logo" />
         <span id="logo-text">GitHub</span>
@@ -104,9 +104,9 @@ export default {
   data() {
     return {
       // TODO: 需修改的页面配置
-      title: "idealclover 友链屋",
-      info: "仅收录友链博客文章，不代表翠翠本人观点",
-      list: "友链列表",
+      title: "Another RSS Reader",
+      info: "Lazy folks take the most pains. ",
+      list: "RSS List",
     };
   },
   mounted() {
