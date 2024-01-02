@@ -12,15 +12,15 @@ const opmlXmlContentTitle = "idealclover Blogroll";
 const maxDataJsonItemsNumberForWeb = 120; // 保存前 120 项
 const maxDataJsonItemsNumberForRSS = 40; // 对RSS保存前 40 项
 var feed = new RSS({
-  title: "idealclover 友链屋",
-  description: "翠翠和他的朋友们的blog，不代表翠翠本人观点",
-  feed_url: "https://blogroll.icl.moe/rss.xml",
-  site_url: "https://blogroll.icl.moe/",
-  image_url: "https://blogroll.icl.moe/assets/logo.png",
-  docs: "https://blogroll.icl.moe",
-  managingEditor: "idealclover",
-  webMaster: "idealclover",
-  copyright: "2022 idealclover",
+  title: "Another RSS Reader",
+  description: "假装是一个RSS阅读器",
+  feed_url: "https://blogroll.axz.me/rss.xml",
+  site_url: "https://blogroll.axz.me/",
+  image_url: "https://blogroll.axz.me/assets/logo.png",
+  docs: "https://blogroll.axz.me/",
+  managingEditor: "Overbye",
+  webMaster: "Overbye",
+  copyright: "2024 Overbye",
   language: "cn",
   ttl: "60",
 });
