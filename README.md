@@ -67,20 +67,20 @@ npm run build
 
 ## LICENSE
 
-项目基于 [NJU-LUG/Blogroll](https://github.com/nju-lug/blogroll)，采用 [MIT Licence](./LICENSE)
+项目基于 [NJU-LUG/Blogroll](https://github.com/nju-lug/blogroll) & [Friend-Link-House](https://github.com/idealclover/Friend-Link-House)，采用 [MIT Licence](./LICENSE)
 
-## 傻翠的朋友 list
+## Feed
 
 | 名称               | 网站                           | 描述（选填）                                             | 头像（默认为/favicon.ico）                                   | RSS（默认为/feed）                     | 分类      |
 | ------------------ | ------------------------------ | -------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------------- | --------- |
-| 羊毛日报           | https://idealclover.top        |                                                          |                                                              | https://ym.today/feed                  | friend    |
-| Good Morning       | https://y-ichen.github.io      | 子喵的个人博客站！                                       | https://y-ichen.github.io/img/favicon.png                    | https://y-ichen.github.io/atom.xml     | friend    |
-| NJU-LUG            | https://blogroll.njulug.org    |                                                          |                                                              |                                        | friend    |
-| ZGQ's Blog         | https://blog.izgq.net          |                                                          |                                                              |                                        | friend    |
-| bus1996            | https://bus1996.me             |                                                          | https://bus1996.me/assets/img/favicon.ico                    |                                        | friend    |
-| HiKi               | https://www.aneureka.cn        |                                                          | https://www.aneureka.cn/img/favicon.ico                      | https://www.aneureka.cn/atom.xml       | friend    |
-| lizhihao6          | https://lizhihao6.online       |                                                          | https://lizhihao6.online/wp-content/uploads/2019/06/cropped-22297584-32x32.jpg |                                        | friend    |
-| Jennifer's Blog    | https://jyzhangchn.github.io   |                                                          | https://jyzhangchn.github.io/images/gavin.JPG                |                                        | friend    |
+| 羊毛日报           | https://ym.today/              |                                                          |                                                              | https://ym.today/feed                  | friend    |
+| 反斗限免           | http://free.apprcn.com         |                                                          |                                                              | http://free.apprcn.com/feed/           | friend    |
+| ZAPRO · 杂铺       | https://tmioe.com              |                                                          |                                                              | https://tmioe.com/feed                 | friend    |
+| 限时免费           | https://xianshiyouhui.com      |                                                          |                                                              | https://xianshiyouhui.com/feed/        | friend    |
+| i3综合社区         | https://www.i3zh.com/          |                                                          |                                                              | https://www.i3zh.com/feed              | friend    |
+| 如有乐享           | https://www.aneureka.cn        |                                                          |                                                              | https://51.ruyo.net/feed/              | friend    |
+| MisakaNo の 小破站 | https://blog.misaka.rest       |                                                          |                                                              | https://blog.misaka.rest/atom.xml      | friend    |
+| 优米格             | https://www.4spaces.org        |                                                          |                                                              | https://www.4spaces.org/feed           | friend    |
 | DIYGod             | https://diygod.me              |                                                          | https://4everland.xyz/ipfs/bafybeibefx2tyow77m2wcnsh5anaaxfy7ypxbcuapb52c4h255onqp72ye | http://diygod.me/atom.xml              | net       |
 | 咸鱼不咸           | https://lcblog.cn              |                                                          |                                                              |                                        | net       |
 | XZYMOE'S BLOG      | https://www.xzymoe.com         |                                                          |                                                              |                                        | net       |
