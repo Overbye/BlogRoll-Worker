@@ -11,8 +11,8 @@
 > 假装是一个 RSS 阅读器
 
 
-
-## 如何使用
+<details>
+<summary> ## 如何使用 </summary>
 
 如果你也想整一个的话，其实也不难，相对还是比较好办的
 
@@ -68,21 +68,24 @@ npm run build
 ## LICENSE
 
 项目基于 [NJU-LUG/Blogroll](https://github.com/nju-lug/blogroll) & [Friend-Link-House](https://github.com/idealclover/Friend-Link-House)，采用 [MIT Licence](./LICENSE)
+</details>
 
-## Feed
+<details>
+
+<summary> ## Feed </summary>
 
 | 名称               | 网站                      | 描述（选填） | 头像（默认为/favicon.ico） | RSS（默认为/feed）                | 分类 |
 | ------------------ | ------------------------- | ------------ | -------------------------- | --------------------------------- | ---- |
 | 羊毛日报           | https://ym.today          |              |                            | https://ym.today/feed             |      |
-| 反斗限免           | http://free.apprcn.com    |              |                            | http://free.apprcn.com/feed/      |      |
+| 反斗限免           | http://free.apprcn.com    |              |                            | http://free.apprcn.com/feed       |      |
 | ZAPRO · 杂铺       | https://tmioe.com         |              |                            | https://tmioe.com/feed            |      |
-| 限时免费           | https://xianshiyouhui.com |              |                            | https://xianshiyouhui.com/feed/   |      |
+| 限时免费           | https://xianshiyouhui.com |              |                            | https://xianshiyouhui.com/feed    |      |
 | i3综合社区         | https://www.i3zh.com      |              |                            | https://www.i3zh.com/feed         |      |
-| 如有乐享           | https://www.aneureka.cn   |              |                            | https://51.ruyo.net/feed/         |      |
+| 如有乐享           | https://51.ruyo.net       |              |                            | https://51.ruyo.net/feed/         |      |
 | MisakaNo の 小破站 | https://blog.misaka.rest  |              |                            | https://blog.misaka.rest/atom.xml |      |
 | 优米格             | https://www.4spaces.org   |              |                            | https://www.4spaces.org/feed      |      |
 | Mareep             | https://blog.mareep.net   |              |                            | https://blog.mareep.net/atom.xml  |      |
 | ahhhhfs            | https://www.ahhhhfs.com   |              |                            | https://www.ahhhhfs.com/feed.xml  |      |
 | omii               | https://omii.top          |              |                            | https://omii.top/feed             |      |
-|                    |                           |              |                            |                                   |      |
+| 黑海洋wiki         | https://blog.upx8.com     |              |                            | https://blog.upx8.com/feed        |      |
 |                    |                           |              |                            |                                   |      |
