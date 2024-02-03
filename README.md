@@ -88,6 +88,6 @@ npm run build
 | ahhhhfs            | https://www.ahhhhfs.com   |              |                            | https://www.ahhhhfs.com/feed.xml  |      |
 | omii               | https://omii.top          |              |                            | https://omii.top/feed             |      |
 | 黑海洋wiki         | https://blog.upx8.com     |              |                            | https://blog.upx8.com/feed        |      |
-| 煙花巷陌           | https://blog.ilue.pp.ua/  |              |                            | https://blog.ilue.pp.ua/rss.xml   |      |
-|                    |                           |              |                            |                                   |      |
+| 煙花巷陌           | https://blog.ilue.pp.ua   |              |                            | https://blog.ilue.pp.ua/rss.xml   |      |
+| Shiina's Bulog     | https://blog.shiina.fun/  |              |                            | https://blog.shiina.fun/feed      |      |
 |                    |                           |              |                            |                                   |      |
