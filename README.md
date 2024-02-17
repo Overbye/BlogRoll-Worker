@@ -90,4 +90,9 @@ npm run build
 | 黑海洋wiki         | https://blog.upx8.com     |              |                            | https://blog.upx8.com/feed        |      |
 | 煙花巷陌           | https://blog.ilue.pp.ua   |              |                            | https://blog.ilue.pp.ua/rss.xml   |      |
 | Shiina's Bulog     | https://blog.shiina.fun/  |              |                            | https://blog.shiina.fun/feed      |      |
+| 麦麦同学           | https://www.mmtx.net/     |              |                            | https://www.mmtx.net/feed         |      |
+|                    |                           |              |                            |                                   |      |
+|                    |                           |              |                            |                                   |      |
+|                    |                           |              |                            |                                   |      |
+|                    |                           |              |                            |                                   |      |
 |                    |                           |              |                            |                                   |      |
