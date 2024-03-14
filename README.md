@@ -89,8 +89,17 @@ npm run build
 | omii               | https://omii.top          |              |                            | https://omii.top/feed             |      |
 | 黑海洋wiki         | https://blog.upx8.com     |              |                            | https://blog.upx8.com/feed        |      |
 | 煙花巷陌           | https://blog.ilue.pp.ua   |              |                            | https://blog.ilue.pp.ua/rss.xml   |      |
-| Shiina's Bulog     | https://blog.shiina.fun/  |              |                            | https://blog.shiina.fun/feed      |      |
-| 麦麦同学           | https://www.mmtx.net/     |              |                            | https://www.mmtx.net/feed         |      |
+| Shiina's Bulog     | https://blog.shiina.fun   |              |                            | https://blog.shiina.fun/feed      |      |
+| 麦麦同学           | https://www.mmtx.net      |              |                            | https://www.mmtx.net/feed         |      |
+| 爱乐唯             | https://ilev.net          |              |                            | https://ilev.net/?feed=rss        |      |
+| AppInn             | https://www.applnn.cc     |              |                            | https://www.applnn.cc/feed        |      |
+| 老白博客           | https://www.xcbtmw.com    |              |                            | https://www.xcbtmw.com/feed       |      |
+| ooly               | https://ooly.cc           |              |                            | https://ooly.cc/feed              |      |
+| 整点猫咪           | https://surge.tel         |              |                            | https://surge.tel/rss             |      |
+| 耕读               | http://igdux.com          |              |                            | http://igdux.com/feed             |      |
+|                    |                           |              |                            |                                   |      |
+|                    |                           |              |                            |                                   |      |
+|                    |                           |              |                            |                                   |      |
 |                    |                           |              |                            |                                   |      |
 |                    |                           |              |                            |                                   |      |
 |                    |                           |              |                            |                                   |      |
