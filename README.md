@@ -40,6 +40,9 @@ CloudFlare 的网站在 [这里](https://cloudflare.com/)，注册账号之后�
 
 - RSS订阅：直接修改 README.md 中下方的表格就可以了
 - RSS Anything:https://rss.diffbot.com/
+- RSS Hub：https://rsshub.axz.me/
+- RSS Proxy：https://proxy-rssfeed.axz.me/
+- RSS Worker:https://rss-worker.overbye.workers.dev/rss/
 - 修改 logo 等其他前端展现（已标记 TODO）
   - ./web/public/favicon.ico -- 网站 icon
   - ./src/assets/logo.png -- 页内显示 logo
@@ -73,34 +76,44 @@ npm run build
 
 ## <summary>  Feed </summary>
 
-| 名称               | 网站                       | 描述（选填） | 头像（默认为/favicon.ico） | RSS（默认为/feed）                         | 分类 |
-| ------------------ | -------------------------- | ------------ | -------------------------- | ------------------------------------------ | ---- |
-| 羊毛日报           | https://ym.today           |              |                            | https://ym.today/feed                      |      |
-| 反斗限免           | http://free.apprcn.com     |              |                            | http://free.apprcn.com/feed                |      |
-| ZAPRO · 杂铺       | https://tmioe.com          |              |                            | https://tmioe.com/feed                     |      |
-| 限时免费           | https://xianshiyouhui.com  |              |                            | https://xianshiyouhui.com/feed             |      |
-| i3综合社区         | https://www.i3zh.com       |              |                            | https://www.i3zh.com/feed                  |      |
-| 如有乐享           | https://51.ruyo.net        |              |                            | https://51.ruyo.net/feed/                  |      |
-| MisakaNo の 小破站 | https://blog.misaka.rest   |              |                            | https://blog.misaka.rest/atom.xml          |      |
-| 优米格             | https://www.4spaces.org    |              |                            | https://www.4spaces.org/feed               |      |
-| Mareep             | https://blog.mareep.net    |              |                            | https://blog.mareep.net/atom.xml           |      |
-| ahhhhfs            | https://www.ahhhhfs.com    |              |                            | https://www.ahhhhfs.com/feed.xml           |      |
-| omii               | https://omii.top           |              |                            | https://omii.top/feed                      |      |
-| 黑海洋wiki         | https://blog.upx8.com      |              |                            | https://blog.upx8.com/feed                 |      |
-| 煙花巷陌           | https://blog.ilue.pp.ua    |              |                            | https://blog.ilue.pp.ua/rss.xml            |      |
-| Shiina's Bulog     | https://blog.shiina.fun    |              |                            | https://blog.shiina.fun/feed               |      |
-| 麦麦同学           | https://www.mmtx.net       |              |                            | https://www.mmtx.net/feed                  |      |
-| 爱乐唯             | https://ilev.net           |              |                            | https://ilev.net/?feed=rss                 |      |
-| AppInn             | https://www.applnn.cc      |              |                            | https://www.applnn.cc/feed                 |      |
-| 老白博客           | https://www.xcbtmw.com     |              |                            | https://www.xcbtmw.com/feed                |      |
-| ooly               | https://ooly.cc            |              |                            | https://ooly.cc/feed                       |      |
-| 整点猫咪           | https://surge.tel          |              |                            | https://surge.tel/rss                      |      |
-| 耕读               | http://igdux.com           |              |                            | http://igdux.com/feed                      |      |
-| 小五四博客         | https://blog.xiao54.com    |              |                            | https://blog.xiao54.com/feed.php           |      |
-| 小叶云             | https://www.xiaoyeyun6.com |              |                            | https://www.xiaoyeyun6.com/index.php/feed/ |      |
-| 清~幽殇            | https://isedu.top          |              |                            | https://isedu.top/feed/                    |      |
-|                    |                            |              |                            |                                            |      |
-|                    |                            |              |                            |                                            |      |
-|                    |                            |              |                            |                                            |      |
-|                    |                            |              |                            |                                            |      |
-|                    |                            |              |                            |                                            |      |
+| 名称                  | 网站                                 | 描述（选填） | 头像（默认为/favicon.ico） | RSS（默认为/feed）                                           | 分类 |
+| --------------------- | ------------------------------------ | ------------ | -------------------------- | ------------------------------------------------------------ | ---- |
+| 羊毛日报              | https://ym.today                     |              |                            | https://ym.today/feed                                        |      |
+| 反斗限免              | http://free.apprcn.com               |              |                            | http://free.apprcn.com/feed                                  |      |
+| ZAPRO · 杂铺          | https://tmioe.com                    |              |                            | https://tmioe.com/feed                                       |      |
+| 限时免费              | https://xianshiyouhui.com            |              |                            | https://xianshiyouhui.com/feed                               |      |
+| i3综合社区            | https://www.i3zh.com                 |              |                            | https://www.i3zh.com/feed                                    |      |
+| 如有乐享              | https://51.ruyo.net                  |              |                            | https://51.ruyo.net/feed/                                    |      |
+| MisakaNo の 小破站    | https://blog.misaka.rest             |              |                            | https://blog.misaka.rest/atom.xml                            |      |
+| 优米格                | https://www.4spaces.org              |              |                            | https://www.4spaces.org/feed                                 |      |
+| Mareep                | https://blog.mareep.net              |              |                            | https://blog.mareep.net/atom.xml                             |      |
+| ahhhhfs               | https://www.ahhhhfs.com              |              |                            | https://www.ahhhhfs.com/feed.xml                             |      |
+| omii                  | https://omii.top                     |              |                            | https://omii.top/feed                                        |      |
+| 黑海洋wiki            | https://blog.upx8.com                |              |                            | https://blog.upx8.com/feed                                   |      |
+| 煙花巷陌              | https://blog.ilue.pp.ua              |              |                            | https://blog.ilue.pp.ua/rss.xml                              |      |
+| Shiina's Bulog        | https://blog.shiina.fun              |              |                            | https://blog.shiina.fun/feed                                 |      |
+| 麦麦同学              | https://www.mmtx.net                 |              |                            | https://www.mmtx.net/feed                                    |      |
+| 爱乐唯                | https://ilev.net                     |              |                            | https://ilev.net/?feed=rss                                   |      |
+| AppInn                | https://www.applnn.cc                |              |                            | https://www.applnn.cc/feed                                   |      |
+| 老白博客              | https://www.xcbtmw.com               |              |                            | https://www.xcbtmw.com/feed                                  |      |
+| ooly                  | https://ooly.cc                      |              |                            | https://ooly.cc/feed                                         |      |
+| 整点猫咪              | https://surge.tel                    |              |                            | https://surge.tel/rss                                        |      |
+| 耕读                  | http://igdux.com                     |              |                            | http://igdux.com/feed                                        |      |
+| 小五四博客            | https://blog.xiao54.com              |              |                            | https://blog.xiao54.com/feed.php                             |      |
+| 小叶云                | https://www.xiaoyeyun6.com           |              |                            | https://www.xiaoyeyun6.com/index.php/feed/                   |      |
+| 清~幽殇               | https://isedu.top                    |              |                            | https://isedu.top/feed/                                      |      |
+| 享乐分享              | https://xiangleshare.com             |              |                            | https://xiangleshare.com/feed                                |      |
+| 熊猫软件站            | https://www.uuzz.cc                  |              |                            | https://www.uuzz.cc/feed                                     |      |
+| 倾城于你              | https://qninq.cn                     |              |                            | https://qninq.cn/feed/                                       |      |
+| HighPing              | https://blog.highp.ing               |              |                            | https://blog.highp.ing/index.xml                             |      |
+| 可汗勤政              | https://space.bilibili.com/23947287/ |              |                            | https://rss-worker.overbye.workers.dev/rss/bilibili/user/video/23947287 |      |
+| TG:Newlearnerの自留地 | https://t.me/NewlearnerChannel       |              |                            | https://rss-worker.overbye.workers.dev/rss/telegram/channel/NewlearnerChannel |      |
+|                       |                                      |              |                            |                                                              |      |
+|                       |                                      |              |                            |                                                              |      |
+|                       |                                      |              |                            |                                                              |      |
+|                       |                                      |              |                            |                                                              |      |
+|                       |                                      |              |                            |                                                              |      |
+|                       |                                      |              |                            |                                                              |      |
+|                       |                                      |              |                            |                                                              |      |
+|                       |                                      |              |                            |                                                              |      |
+|                       |                                      |              |                            |                                                              |      |
