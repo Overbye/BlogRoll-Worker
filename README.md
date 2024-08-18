@@ -108,7 +108,7 @@ npm run build
 | HighPing              | https://blog.highp.ing               |              |                            | https://blog.highp.ing/index.xml                             |      |
 | 可汗勤政              | https://space.bilibili.com/23947287/ |              |                            | https://rss-worker.overbye.workers.dev/rss/bilibili/user/video/23947287 |      |
 | TG:Newlearnerの自留地 | https://t.me/NewlearnerChannel       |              |                            | https://rss-worker.overbye.workers.dev/rss/telegram/channel/NewlearnerChannel |      |
-|                       |                                      |              |                            |                                                              |      |
+| 火凤凰                | https://rulel.com/                   |              |                            | https://rulel.com/feed/                                      |      |
 |                       |                                      |              |                            |                                                              |      |
 |                       |                                      |              |                            |                                                              |      |
 |                       |                                      |              |                            |                                                              |      |
