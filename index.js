@@ -78,6 +78,7 @@ async function fetchWithTimeout(resource, options = {}) {
     try {
       if(meta.category.includes("lost")){
         meta.category = meta.category.substring(5);
+        meta.avatarUrl = "";
         meta.status = "lost";
         continue;
       }
@@ -88,6 +89,7 @@ async function fetchWithTimeout(resource, options = {}) {
         meta.status = "active";
       } else {
         meta.status = "lost";
+        meta.avatarUrl = "";
         console.log("网络异常-未成功访问网站-404: " + meta.title);
         throw "404";
       }
@@ -119,6 +121,7 @@ async function fetchWithTimeout(resource, options = {}) {
       }
     } catch (err) {
       meta.status = "lost";
+      meta.avatarUrl = "";
       console.log("网络异常-未成功访问网站-500: " + meta.title);
     }
     if (linkListJson[meta.category] == null) {
