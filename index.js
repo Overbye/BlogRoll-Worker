@@ -76,6 +76,10 @@ async function fetchWithTimeout(resource, options = {}) {
   const linkListJson = {};
   for (const meta of metaJson) {
     try {
+      if(meta.status.includes("lost")){
+        meta.status = "lost";
+        continue;
+      }
       // 确认网站是否可以访问
       const response = await fetchWithTimeout(meta.htmlUrl);
       const whiteList = ["Sukka"];
