@@ -76,7 +76,8 @@ async function fetchWithTimeout(resource, options = {}) {
   const linkListJson = {};
   for (const meta of metaJson) {
     try {
-      if(meta.status.includes("lost")){
+      if(meta.category.includes("lost")){
+        meta.category = meta.category.substring(5);
         meta.status = "lost";
         continue;
       }
@@ -117,7 +118,6 @@ async function fetchWithTimeout(resource, options = {}) {
         console.log("网络异常-未成功获取信息: " + meta.title);
       }
     } catch (err) {
-      // console.log(err);
       meta.status = "lost";
       console.log("网络异常-未成功访问网站-500: " + meta.title);
     }
