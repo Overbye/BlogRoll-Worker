@@ -9,3 +9,6 @@ zone_id = "dac67509f8ab93320c00b66daad8d897"
 [site]
 bucket = "./web/dist"
 entry-point = "workers-site"
+
+[observability.logs]
+enabled = false
