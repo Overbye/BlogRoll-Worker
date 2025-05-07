@@ -121,173 +121,183 @@ async function fetchFeed(url) {
 // console.log(metaJson);
 
 (async () => {
-  const linkListJson = {};
-  for (const meta of metaJson) {
-    try {
-      // 确认网站是否可以访问
-      const response = await fetchWithTimeout(meta.htmlUrl);
-      const whiteList = ["Sukka"];
-      if (response.ok || whiteList.includes(meta["title"])) {
-        meta.status = "active";
-      } else {
+  try {
+    const linkListJson = {};
+    for (const meta of metaJson) {
+      try {
+        // 确认网站是否可以访问
+        const response = await fetchWithTimeout(meta.htmlUrl);
+        const whiteList = ["Sukka"];
+        if (response.ok || whiteList.includes(meta["title"])) {
+          meta.status = "active";
+        } else {
+          meta.status = "lost";
+          console.log("网络异常-未成功访问网站-404: " + meta.title);
+          throw "404";
+        }
+
+        try {
+          // 获取网站默认URL
+          if (meta.avatarUrl == "") {
+            const favicon = meta.htmlUrl + "/favicon.ico";
+            const response = await fetchWithTimeout(favicon);
+            if (response.ok) {
+              meta.avatarUrl = favicon;
+            } else {
+              console.log("未成功获取图标: " + meta.title);
+            }
+          }
+          // 获取网站默认RSS
+          if (meta.xmlUrl == "") {
+            const feed = meta.htmlUrl + "/feed";
+            const response = await fetchWithTimeout(feed);
+            if (response.ok) {
+              meta.xmlUrl = feed;
+            } else {
+              console.log("未成功获取RSS: " + meta.title);
+            }
+          }
+        } catch (err) {
+          console.log("网络异常-未成功获取信息: " + meta.title);
+        }
+      } catch (err) {
         meta.status = "lost";
-        console.log("网络异常-未成功访问网站-404: " + meta.title);
-        throw "404";
+        console.log("网络异常-未成功访问网站-500: " + meta.title);
+      }
+      if (linkListJson[meta.category] == null) {
+        linkListJson[meta.category] = { active: [], lost: [] };
+      }
+      linkListJson[meta.category][meta.status].push(meta);
+    }
+
+    // 保存 linkList.json
+    console.log(metaJson);
+    await fs.writeFileSync(
+      linkListJsonPath,
+      JSON.stringify(linkListJson, null, 2),
+      {
+        encoding: "utf-8",
+      }
+    );
+
+    // 生成 opml.json
+    const opmlJson = metaJson.map(
+      ({ avatarUrl, description, category, ...rest }) => {
+        return rest;
+      }
+    );
+
+    // 保存 opml.json 和 opml.xml
+    fs.writeFileSync(opmlJsonPath, JSON.stringify(opmlJson, null, 2), {
+      encoding: "utf-8",
+    });
+    const opmlXmlContent =
+      opmlXmlContentOp +
+      opmlJson
+        .map(
+          (lineJson) =>
+            `  <outline title="${lineJson.title}" xmlUrl="${lineJson.xmlUrl}" htmlUrl="${lineJson.htmlUrl}" />\n`
+        )
+        .join("") +
+      opmlXmlContentEd;
+    fs.writeFileSync(opmlXmlPath, opmlXmlContent, { encoding: "utf-8" });
+
+    // 用于存储各项数据
+    dataJson = [];
+
+    for (const lineJson of metaJson) {
+      if (lineJson.xmlUrl == "") {
+        continue;
       }
 
       try {
-        // 获取网站默认URL
-        if (meta.avatarUrl == "") {
-          const favicon = meta.htmlUrl + "/favicon.ico";
-          const response = await fetchWithTimeout(favicon);
-          if (response.ok) {
-            meta.avatarUrl = favicon;
-          } else {
-            console.log("未成功获取图标: " + meta.title);
-          }
-        }
-        // 获取网站默认RSS
-        if (meta.xmlUrl == "") {
-          const feed = meta.htmlUrl + "/feed";
-          const response = await fetchWithTimeout(feed);
-          if (response.ok) {
-            meta.xmlUrl = feed;
-          } else {
-            console.log("未成功获取RSS: " + meta.title);
-          }
+        // 读取 RSS 的具体内容
+        const xmlData = await fetchFeed(lineJson.xmlUrl);
+        if (xmlData) {
+          const feed = await parser.parseString(xmlData);
+          console.log("xmlUrl: " + lineJson.xmlUrl);
+
+          // 数组合并
+          dataJson.push.apply(
+            dataJson,
+            feed.items
+              .filter((item) => item.title)
+              .map((item) => {
+                const pubDate = new Date(item.pubDate ?? item.published);
+                return {
+                  name: lineJson.title,
+                  xmlUrl: lineJson.xmlUrl,
+                  htmlUrl: lineJson.htmlUrl,
+                  title: item.title,
+                  link: item.link,
+                  summary: item.summary ? item.summary : item.content,
+                  pubDate: pubDate,
+                  pubDateYYMMDD: pubDate.toISOString().split("T")[0],
+                  pubDateMMDD: pubDate.toISOString().split("T")[0].slice(5),
+                  pubDateYY: pubDate.toISOString().slice(0, 4),
+                  pubDateMM: pubDate.toISOString().slice(5, 7),
+                };
+              })
+          );
         }
       } catch (err) {
-        console.log("网络异常-未成功获取信息: " + meta.title);
+        console.error(`Failed to fetch URL: ${lineJson.xmlUrl}. Error: ${err.message}`);
       }
-    } catch (err) {
-      meta.status = "lost";
-      console.log("网络异常-未成功访问网站-500: " + meta.title);
-    }
-    if (linkListJson[meta.category] == null) {
-      linkListJson[meta.category] = { active: [], lost: [] };
-    }
-    linkListJson[meta.category][meta.status].push(meta);
-  }
-
-  // 保存 linkList.json
-  console.log(metaJson);
-  await fs.writeFileSync(
-    linkListJsonPath,
-    JSON.stringify(linkListJson, null, 2),
-    {
-      encoding: "utf-8",
-    }
-  );
-
-  // 生成 opml.json
-  const opmlJson = metaJson.map(
-    ({ avatarUrl, description, category, ...rest }) => {
-      return rest;
-    }
-  );
-
-  // 保存 opml.json 和 opml.xml
-  fs.writeFileSync(opmlJsonPath, JSON.stringify(opmlJson, null, 2), {
-    encoding: "utf-8",
-  });
-  const opmlXmlContent =
-    opmlXmlContentOp +
-    opmlJson
-      .map(
-        (lineJson) =>
-          `  <outline title="${lineJson.title}" xmlUrl="${lineJson.xmlUrl}" htmlUrl="${lineJson.htmlUrl}" />\n`
-      )
-      .join("") +
-    opmlXmlContentEd;
-  fs.writeFileSync(opmlXmlPath, opmlXmlContent, { encoding: "utf-8" });
-
-  // 用于存储各项数据
-  dataJson = [];
-
-  for (const lineJson of metaJson) {
-    if (lineJson.xmlUrl == "") {
-      continue;
     }
 
-    try {
-      // 读取 RSS 的具体内容
-      const xmlData = await fetchFeed(lineJson.xmlUrl);
-      if (xmlData) {
-        const feed = await parser.parseString(xmlData);
-        console.log("xmlUrl: " + lineJson.xmlUrl);
+    // 去重
+    dataJson = dataJson.filter(
+      (arr, index, self) => index === self.findIndex((t) => t.title === arr.title)
+    );
+    // 按时间顺序排序
+    dataJson.sort((itemA, itemB) => (itemA.pubDate < itemB.pubDate ? 1 : -1));
+    // 默认为保存前 n 项的数据, 并保证不超过当前时间
+    const curDate = new Date();
+    const dataJsonSliced = dataJson.filter((item) => item.pubDate <= curDate);
 
-        // 数组合并
-        dataJson.push.apply(
-          dataJson,
-          feed.items
-            .filter((item) => item.title)
-            .map((item) => {
-              const pubDate = new Date(item.pubDate ?? item.published);
-              return {
-                name: lineJson.title,
-                xmlUrl: lineJson.xmlUrl,
-                htmlUrl: lineJson.htmlUrl,
-                title: item.title,
-                link: item.link,
-                summary: item.summary ? item.summary : item.content,
-                pubDate: pubDate,
-                pubDateYYMMDD: pubDate.toISOString().split("T")[0],
-                pubDateMMDD: pubDate.toISOString().split("T")[0].slice(5),
-                pubDateYY: pubDate.toISOString().slice(0, 4),
-                pubDateMM: pubDate.toISOString().slice(5, 7),
-              };
-            })
-        );
+    const dataJsonSlicedForWeb = dataJsonSliced
+      .slice(0, Math.min(maxDataJsonItemsNumberForWeb, dataJson.length))
+      .map(({ summary, ...rest }) => {
+        return rest;
+      });
+    const dataJsonSlicedForRSS = dataJsonSliced.slice(
+      0,
+      Math.min(maxDataJsonItemsNumberForRSS, dataJson.length)
+    );
+
+    // 写 json 数据
+    fs.writeFileSync(
+      dataJsonPath,
+      JSON.stringify(dataJsonSlicedForWeb, null, 2),
+      {
+        encoding: "utf-8",
       }
-    } catch (err) {
-      console.error(`Failed to fetch URL: ${lineJson.xmlUrl}. Error: ${err.message}`);
+    );
+
+    if (dataJson.length > 0) {
+      feed.pubDate = dataJson[0].pubDate;
+    } else {
+      console.error("No valid RSS data available.");
+      feed.pubDate = new Date().toISOString();
     }
-  }
 
-  // 去重
-  dataJson = dataJson.filter(
-    (arr, index, self) => index === self.findIndex((t) => t.title === arr.title)
-  );
-  // 按时间顺序排序
-  dataJson.sort((itemA, itemB) => (itemA.pubDate < itemB.pubDate ? 1 : -1));
-  // 默认为保存前 n 项的数据, 并保证不超过当前时间
-  const curDate = new Date();
-  const dataJsonSliced = dataJson.filter((item) => item.pubDate <= curDate);
-
-  const dataJsonSlicedForWeb = dataJsonSliced
-    .slice(0, Math.min(maxDataJsonItemsNumberForWeb, dataJson.length))
-    .map(({ summary, ...rest }) => {
-      return rest;
-    });
-  const dataJsonSlicedForRSS = dataJsonSliced.slice(
-    0,
-    Math.min(maxDataJsonItemsNumberForRSS, dataJson.length)
-  );
-
-  // 写 json 数据
-  fs.writeFileSync(
-    dataJsonPath,
-    JSON.stringify(dataJsonSlicedForWeb, null, 2),
-    {
-      encoding: "utf-8",
+    //整理 RSS 数据
+    for (let item of dataJsonSlicedForRSS) {
+      feed.item({
+        title: item.title,
+        description: item.summary,
+        url: item.link, // link to the item
+        author: item.name, // optional - defaults to feed author property
+        date: item.pubDate.toISOString(), // any format that js Date can parse.
+      });
     }
-  );
 
-  feed.pubDate = dataJson[0].pubDate;
-
-  //整理 RSS 数据
-  for (let item of dataJsonSlicedForRSS) {
-    feed.item({
-      title: item.title,
-      description: item.summary,
-      url: item.link, // link to the item
-      author: item.name, // optional - defaults to feed author property
-      date: item.pubDate.toISOString(), // any format that js Date can parse.
-    });
+    // 保存 rss.xml 文件
+    const rssXmlContent = feed.xml();
+    fs.writeFileSync(rssXmlPath, rssXmlContent, { encoding: "utf-8" });
+    process.exit();
+  } catch (error) {
+    console.error("Unhandled exception:", error);
+    process.exit(1); // 确保工作流检测到失败
   }
-
-  // 保存 rss.xml 文件
-  const rssXmlContent = feed.xml();
-  fs.writeFileSync(rssXmlPath, rssXmlContent, { encoding: "utf-8" });
-  process.exit();
 })();
