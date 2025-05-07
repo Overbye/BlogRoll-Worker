@@ -64,38 +64,53 @@ while ((resultArray = pattern.exec(readmeMdContent)) !== null) {
 }
 
 // 添加重试逻辑
-async function fetchWithRetry(url, retries = 3, delay = 1000) {
+async function fetchWithRetry(url, retries = 5, delay = 1000) {
   try {
     return await parser.parseURL(url);
   } catch (error) {
     if (retries > 0) {
-      await new Promise(res => setTimeout(res, delay));
+      await new Promise((res) => setTimeout(res, delay));
       return fetchWithRetry(url, retries - 1, delay * 2);
     }
+    console.error(`Exhausted retries for URL: ${url}`);
     throw error;
   }
 }
 
 // 修改 fetchWithTimeout 函数，使用 fetchWithRetry
 async function fetchWithTimeout(resource, options = {}) {
-  return fetchWithRetry(resource, options);
+  const response = await fetchWithRetry(resource, options);
+  if (!response.ok) {
+    console.error(`Request failed with status: ${response.status}`);
+    return null;
+  }
+  return response;
 }
 
 function validateXML(xmlData) {
-  const isValid = XMLValidator.validate(xmlData);
-  if (!isValid) {
+  const validationResult = XMLValidator.validate(xmlData, {
+    allowBooleanAttributes: true, // 处理带有布尔属性的 feeds
+  });
+
+  if (validationResult !== true) {
     console.error('Invalid XML:', XMLValidator.getError());
+    return false;
   }
-  return isValid;
+  return true;
 }
 
 async function fetchFeed(url) {
   try {
     const response = await fetchWithTimeout(url);
-    const xmlData = await response.text();
+    if (!response.ok) {
+      console.error(`Request failed with status: ${response.status}`);
+      return null;
+    }
+    const xmlData = await response.text(); // 确保 response.text() 支持
     if (validateXML(xmlData)) {
       return xmlData;
     }
+    console.error('Invalid XML data:', xmlData);
     return null;
   } catch (error) {
     console.error(`Failed to fetch URL: ${url}. Error: ${error.message}`);
