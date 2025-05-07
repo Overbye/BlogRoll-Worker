@@ -66,7 +66,12 @@ while ((resultArray = pattern.exec(readmeMdContent)) !== null) {
 // 添加重试逻辑
 async function fetchWithRetry(url, retries = 5, delay = 1000) {
   try {
-    return await parser.parseURL(url);
+    const response = await parser.parseURL(url);
+    if (!response || !response.ok) {
+      console.error(`Request failed with status: ${response ? response.status : 'unknown'}`);
+      return null;
+    }
+    return response;
   } catch (error) {
     if (retries > 0) {
       await new Promise((res) => setTimeout(res, delay));
@@ -79,12 +84,17 @@ async function fetchWithRetry(url, retries = 5, delay = 1000) {
 
 // 修改 fetchWithTimeout 函数，使用 fetchWithRetry
 async function fetchWithTimeout(resource, options = {}) {
-  const response = await fetchWithRetry(resource, options);
-  if (!response.ok) {
-    console.error(`Request failed with status: ${response.status}`);
+  try {
+    const response = await fetchWithRetry(resource, options);
+    if (!response || !response.ok) {
+      console.error(`Request failed with status: ${response ? response.status : 'unknown'}`);
+      return null;
+    }
+    return response;
+  } catch (error) {
+    console.error(`Error fetching URL: ${resource}. Error: ${error.message}`);
     return null;
   }
-  return response;
 }
 
 function validateXML(xmlData) {
