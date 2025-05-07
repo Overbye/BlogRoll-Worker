@@ -11,6 +11,7 @@ const parser = new Parser({
 // 引入 RSS 生成器
 const RSS = require("rss");
 // const HttpsProxyAgent = require("https-proxy-agent");
+const { XMLValidator } = require('fast-xml-parser');
 
 // TODO: 需要重点关注和修改的配置
 const opmlXmlContentTitle = "idealclover Blogroll";
@@ -78,6 +79,28 @@ async function fetchWithRetry(url, retries = 3, delay = 1000) {
 // 修改 fetchWithTimeout 函数，使用 fetchWithRetry
 async function fetchWithTimeout(resource, options = {}) {
   return fetchWithRetry(resource, options);
+}
+
+function validateXML(xmlData) {
+  const isValid = XMLValidator.validate(xmlData);
+  if (!isValid) {
+    console.error('Invalid XML:', XMLValidator.getError());
+  }
+  return isValid;
+}
+
+async function fetchFeed(url) {
+  try {
+    const response = await fetchWithTimeout(url);
+    const xmlData = await response.text();
+    if (validateXML(xmlData)) {
+      return xmlData;
+    }
+    return null;
+  } catch (error) {
+    console.error(`Failed to fetch URL: ${url}. Error: ${error.message}`);
+    return null;
+  }
 }
 
 // console.log(metaJson);
@@ -173,31 +196,34 @@ async function fetchWithTimeout(resource, options = {}) {
 
     try {
       // 读取 RSS 的具体内容
-      const feed = await parser.parseURL(lineJson.xmlUrl);
-      console.log("xmlUrl: " + lineJson.xmlUrl);
+      const xmlData = await fetchFeed(lineJson.xmlUrl);
+      if (xmlData) {
+        const feed = await parser.parseString(xmlData);
+        console.log("xmlUrl: " + lineJson.xmlUrl);
 
-      // 数组合并
-      dataJson.push.apply(
-        dataJson,
-        feed.items
-          .filter((item) => item.title)
-          .map((item) => {
-            const pubDate = new Date(item.pubDate ?? item.published);
-            return {
-              name: lineJson.title,
-              xmlUrl: lineJson.xmlUrl,
-              htmlUrl: lineJson.htmlUrl,
-              title: item.title,
-              link: item.link,
-              summary: item.summary ? item.summary : item.content,
-              pubDate: pubDate,
-              pubDateYYMMDD: pubDate.toISOString().split("T")[0],
-              pubDateMMDD: pubDate.toISOString().split("T")[0].slice(5),
-              pubDateYY: pubDate.toISOString().slice(0, 4),
-              pubDateMM: pubDate.toISOString().slice(5, 7),
-            };
-          })
-      );
+        // 数组合并
+        dataJson.push.apply(
+          dataJson,
+          feed.items
+            .filter((item) => item.title)
+            .map((item) => {
+              const pubDate = new Date(item.pubDate ?? item.published);
+              return {
+                name: lineJson.title,
+                xmlUrl: lineJson.xmlUrl,
+                htmlUrl: lineJson.htmlUrl,
+                title: item.title,
+                link: item.link,
+                summary: item.summary ? item.summary : item.content,
+                pubDate: pubDate,
+                pubDateYYMMDD: pubDate.toISOString().split("T")[0],
+                pubDateMMDD: pubDate.toISOString().split("T")[0].slice(5),
+                pubDateYY: pubDate.toISOString().slice(0, 4),
+                pubDateMM: pubDate.toISOString().slice(5, 7),
+              };
+            })
+        );
+      }
     } catch (err) {
       console.error(`Failed to fetch URL: ${lineJson.xmlUrl}. Error: ${err.message}`);
     }
