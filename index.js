@@ -119,11 +119,9 @@ async function fetchWithTimeout(resource, options = {}) {
           }
         }
       } catch (err) {
-        // console.log(err);
         console.log("网络异常-未成功获取信息: " + meta.title);
       }
     } catch (err) {
-      // console.log(err);
       meta.status = "lost";
       console.log("网络异常-未成功访问网站-500: " + meta.title);
     }
@@ -184,9 +182,7 @@ async function fetchWithTimeout(resource, options = {}) {
         feed.items
           .filter((item) => item.title)
           .map((item) => {
-            // console.log(item)
             const pubDate = new Date(item.pubDate ?? item.published);
-            // console.log(pubDate);
             return {
               name: lineJson.title,
               xmlUrl: lineJson.xmlUrl,
@@ -203,25 +199,17 @@ async function fetchWithTimeout(resource, options = {}) {
           })
       );
     } catch (err) {
-      // 网络超时，进行 Log 报告
-      console.log(err);
-      console.log("-------------------------");
-      console.log("xmlUrl: " + lineJson.xmlUrl);
-      console.log("-------------------------");
+      console.error(`Failed to fetch URL: ${lineJson.xmlUrl}. Error: ${err.message}`);
     }
   }
 
   // 去重
-  // https://stackoverflow.com/questions/23507853/remove-duplicate-objects-from-json-array
   dataJson = dataJson.filter(
     (arr, index, self) => index === self.findIndex((t) => t.title === arr.title)
   );
   // 按时间顺序排序
   dataJson.sort((itemA, itemB) => (itemA.pubDate < itemB.pubDate ? 1 : -1));
   // 默认为保存前 n 项的数据, 并保证不超过当前时间
-  // for (let item of dataJson) {
-  //   console.log(item.title);
-  // }
   const curDate = new Date();
   const dataJsonSliced = dataJson.filter((item) => item.pubDate <= curDate);
 
