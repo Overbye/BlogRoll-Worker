@@ -2,7 +2,12 @@
 const fs = require("fs");
 // 引入 RSS 解析第三方包
 const Parser = require("rss-parser");
-const parser = new Parser({ timeout: 12000 });
+const parser = new Parser({
+  timeout: 30000, // 将超时时间增加到 30 秒
+  headers: {
+    'User-Agent': 'Mozilla/5.0'
+  }
+});
 // 引入 RSS 生成器
 const RSS = require("rss");
 // const HttpsProxyAgent = require("https-proxy-agent");
@@ -57,17 +62,22 @@ while ((resultArray = pattern.exec(readmeMdContent)) !== null) {
   });
 }
 
+// 添加重试逻辑
+async function fetchWithRetry(url, retries = 3, delay = 1000) {
+  try {
+    return await parser.parseURL(url);
+  } catch (error) {
+    if (retries > 0) {
+      await new Promise(res => setTimeout(res, delay));
+      return fetchWithRetry(url, retries - 1, delay * 2);
+    }
+    throw error;
+  }
+}
+
+// 修改 fetchWithTimeout 函数，使用 fetchWithRetry
 async function fetchWithTimeout(resource, options = {}) {
-  // const { timeout = 12000 } = options;
-  // options["agent"] = new HttpsProxyAgent("http://127.0.0.1:1087");
-  const controller = new AbortController();
-  setTimeout(() => controller.abort(), 12000);
-  const response = await fetch(resource, {
-    ...options,
-    signal: controller.signal,
-  });
-  // clearTimeout(id);
-  return response;
+  return fetchWithRetry(resource, options);
 }
 
 // console.log(metaJson);
