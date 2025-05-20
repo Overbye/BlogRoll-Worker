@@ -112,15 +112,15 @@ function validateXML(xmlData) {
 async function fetchFeed(url) {
   try {
     const response = await fetchWithTimeout(url);
-    if (!response.ok) {
-      console.error(`Request failed with status: ${response.status}`);
+    if (!response || !response.ok) {
+      console.error(`Request failed for URL: ${url}`);
       return null;
     }
-    const xmlData = await response.text(); // 确保 response.text() 支持
+    const xmlData = await response.text();
     if (validateXML(xmlData)) {
       return xmlData;
     }
-    console.error('Invalid XML data:', xmlData);
+    console.error(`Invalid XML data for URL: ${url}`);
     return null;
   } catch (error) {
     console.error(`Failed to fetch URL: ${url}. Error: ${error.message}`);
