@@ -1,6 +1,7 @@
 // 文件读取包
 const fs = require("fs");
 const fetch = require("node-fetch");
+const YAML = require("yaml");
 // 引入 RSS 解析第三方包
 const Parser = require("rss-parser");
 const parser = new Parser();
@@ -28,7 +29,7 @@ var feed = new RSS({
 });
 
 // 其他相关配置
-const readmeMdPath = "./README.md";
+const feedsYamlPath = "./config/feeds.yaml";
 const opmlJsonPath = "./web/src/assets/opml.json";
 const dataJsonPath = "./web/src/assets/data.json";
 const linkListJsonPath = "./web/public/linkList.json";
@@ -40,24 +41,79 @@ const opmlXmlContentOp =
   "</title>\n  </head>\n  <body>\n\n";
 const opmlXmlContentEd = "\n  </body>\n</opml>";
 
-// 解析 README 中的表格，转为 JSON
-const pattern =
-  /\| *([^\|]*) *\| *(http[^\|]*) *\| *([^\|\n]*) *\| *([^\| \n]*) *\| *([^\| \n]*) *\| *([^\| \n]*) *\|\n/g;
-  // /\| *([^\|]*) *\| *(http[^\|]*) *\| *([^\|\n]*) *\| *([^\| \n]*) *\| *([^\| \n]*) *\| *([^\| \n]*) *\|/g;
-const readmeMdContent = fs.readFileSync(readmeMdPath, { encoding: "utf-8" });
+function normalizeText(value) {
+  return value == null ? "" : String(value).trim();
+}
 
-const metaJson = [];
-let resultArray;
-while ((resultArray = pattern.exec(readmeMdContent)) !== null) {
-  metaJson.push({
-    title: resultArray[1].trim(),
-    htmlUrl: resultArray[2].trim(),
-    description: resultArray[3].trim(),
-    avatarUrl: resultArray[4].trim(),
-    xmlUrl: resultArray[5].trim(),
-    category: resultArray[6].trim(),
+function assertHttpUrl(value, fieldName, itemNumber, required = false) {
+  if (!value) {
+    if (required) {
+      throw new Error(`feeds.yaml 第 ${itemNumber} 项缺少 ${fieldName}`);
+    }
+    return;
+  }
+
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(value);
+  } catch {
+    throw new Error(`feeds.yaml 第 ${itemNumber} 项的 ${fieldName} 不是有效 URL: ${value}`);
+  }
+
+  if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+    throw new Error(`feeds.yaml 第 ${itemNumber} 项的 ${fieldName} 必须使用 HTTP(S): ${value}`);
+  }
+}
+
+function loadFeedConfig(filePath) {
+  const config = YAML.parse(fs.readFileSync(filePath, { encoding: "utf-8" }));
+  if (!config || config.version !== 1) {
+    throw new Error("feeds.yaml 缺少受支持的 version: 1");
+  }
+  if (!Array.isArray(config.feeds) || config.feeds.length === 0) {
+    throw new Error("feeds.yaml 的 feeds 必须是非空数组");
+  }
+
+  const seenTitles = new Set();
+  const seenFeedUrls = new Set();
+  return config.feeds.map((item, index) => {
+    const itemNumber = index + 1;
+    if (!item || typeof item !== "object" || Array.isArray(item)) {
+      throw new Error(`feeds.yaml 第 ${itemNumber} 项必须是对象`);
+    }
+
+    const normalized = {
+      title: normalizeText(item.title),
+      htmlUrl: normalizeText(item.htmlUrl),
+      description: normalizeText(item.description),
+      avatarUrl: normalizeText(item.avatarUrl),
+      xmlUrl: normalizeText(item.xmlUrl),
+      category: normalizeText(item.category),
+    };
+
+    if (!normalized.title) {
+      throw new Error(`feeds.yaml 第 ${itemNumber} 项缺少 title`);
+    }
+    assertHttpUrl(normalized.htmlUrl, "htmlUrl", itemNumber, true);
+    assertHttpUrl(normalized.avatarUrl, "avatarUrl", itemNumber);
+    assertHttpUrl(normalized.xmlUrl, "xmlUrl", itemNumber);
+
+    if (seenTitles.has(normalized.title)) {
+      throw new Error(`feeds.yaml 包含重复 title: ${normalized.title}`);
+    }
+    if (normalized.xmlUrl && seenFeedUrls.has(normalized.xmlUrl)) {
+      throw new Error(`feeds.yaml 包含重复 xmlUrl: ${normalized.xmlUrl}`);
+    }
+    seenTitles.add(normalized.title);
+    if (normalized.xmlUrl) {
+      seenFeedUrls.add(normalized.xmlUrl);
+    }
+
+    return normalized;
   });
 }
+
+const metaJson = loadFeedConfig(feedsYamlPath);
 
 // rss-parser.parseURL() 返回的是解析后的 Feed，而不是带有 ok/text() 的 HTTP Response。
 // 统一使用 node-fetch 获取原始响应，再交给 rss-parser.parseString() 解析。
@@ -347,4 +403,3 @@ async function mapWithConcurrency(items, concurrency, mapper) {
     process.exit(1); // 确保工作流检测到失败
   }
 })();
-
