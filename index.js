@@ -1,13 +1,9 @@
 // 文件读取包
 const fs = require("fs");
+const fetch = require("node-fetch");
 // 引入 RSS 解析第三方包
 const Parser = require("rss-parser");
-const parser = new Parser({
-  timeout: 30000, // 将超时时间增加到 30 秒
-  headers: {
-    'User-Agent': 'Mozilla/5.0'
-  }
-});
+const parser = new Parser();
 // 引入 RSS 生成器
 const RSS = require("rss");
 // const HttpsProxyAgent = require("https-proxy-agent");
@@ -63,34 +59,48 @@ while ((resultArray = pattern.exec(readmeMdContent)) !== null) {
   });
 }
 
-// 添加重试逻辑
-async function fetchWithRetry(url, retries = 5, delay = 1000) {
-  try {
-    const response = await parser.parseURL(url);
-    if (!response || !response.ok) {
-      console.error(`Request failed with status: ${response ? response.status : 'unknown'}`);
-      return null;
+// rss-parser.parseURL() 返回的是解析后的 Feed，而不是带有 ok/text() 的 HTTP Response。
+// 统一使用 node-fetch 获取原始响应，再交给 rss-parser.parseString() 解析。
+async function fetchWithRetry(url, options = {}, retries = 1, delay = 1000) {
+  let lastError;
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        timeout: 15000,
+        redirect: "follow",
+        ...options,
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; BlogRoll-Worker/1.0; +https://blogroll.axz.me/)",
+          Accept: "application/rss+xml, application/atom+xml, application/xml, text/xml, text/html;q=0.9, */*;q=0.8",
+          ...(options.headers || {}),
+        },
+      });
+
+      if (response.ok) {
+        return response;
+      }
+
+      lastError = new Error(`HTTP ${response.status} ${response.statusText}`);
+      // 除限流和超时外，4xx 通常重试也不会恢复。
+      if (response.status >= 400 && response.status < 500 && ![408, 429].includes(response.status)) {
+        break;
+      }
+    } catch (error) {
+      lastError = error;
     }
-    return response;
-  } catch (error) {
-    if (retries > 0) {
-      await new Promise((res) => setTimeout(res, delay));
-      return fetchWithRetry(url, retries - 1, delay * 2);
+
+    if (attempt < retries) {
+      await new Promise((resolve) => setTimeout(resolve, delay * 2 ** attempt));
     }
-    console.error(`Exhausted retries for URL: ${url}`);
-    throw error;
   }
+
+  throw lastError || new Error("Unknown fetch error");
 }
 
-// 修改 fetchWithTimeout 函数，使用 fetchWithRetry
 async function fetchWithTimeout(resource, options = {}) {
   try {
-    const response = await fetchWithRetry(resource, options);
-    if (!response || !response.ok) {
-      console.error(`Request failed with status: ${response ? response.status : 'unknown'}`);
-      return null;
-    }
-    return response;
+    return await fetchWithRetry(resource, options);
   } catch (error) {
     console.error(`Error fetching URL: ${resource}. Error: ${error.message}`);
     return null;
@@ -103,7 +113,7 @@ function validateXML(xmlData) {
   });
 
   if (validationResult !== true) {
-    console.error('Invalid XML:', XMLValidator.getError());
+    console.error("Invalid XML:", validationResult.err);
     return false;
   }
   return true;
@@ -128,17 +138,34 @@ async function fetchFeed(url) {
   }
 }
 
+async function mapWithConcurrency(items, concurrency, mapper) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < items.length) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      results[currentIndex] = await mapper(items[currentIndex], currentIndex);
+    }
+  }
+
+  const workerCount = Math.min(concurrency, items.length);
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+  return results;
+}
+
 // console.log(metaJson);
 
 (async () => {
   try {
     const linkListJson = {};
-    for (const meta of metaJson) {
+    await mapWithConcurrency(metaJson, 6, async (meta) => {
       try {
         // 确认网站是否可以访问
         const response = await fetchWithTimeout(meta.htmlUrl);
         const whiteList = ["Sukka"];
-        if (response.ok || whiteList.includes(meta["title"])) {
+        if ((response && response.ok) || whiteList.includes(meta.title)) {
           meta.status = "active";
         } else {
           meta.status = "lost";
@@ -151,7 +178,7 @@ async function fetchFeed(url) {
           if (meta.avatarUrl == "") {
             const favicon = meta.htmlUrl + "/favicon.ico";
             const response = await fetchWithTimeout(favicon);
-            if (response.ok) {
+            if (response && response.ok) {
               meta.avatarUrl = favicon;
             } else {
               console.log("未成功获取图标: " + meta.title);
@@ -161,7 +188,7 @@ async function fetchFeed(url) {
           if (meta.xmlUrl == "") {
             const feed = meta.htmlUrl + "/feed";
             const response = await fetchWithTimeout(feed);
-            if (response.ok) {
+            if (response && response.ok) {
               meta.xmlUrl = feed;
             } else {
               console.log("未成功获取RSS: " + meta.title);
@@ -174,6 +201,9 @@ async function fetchFeed(url) {
         meta.status = "lost";
         console.log("网络异常-未成功访问网站-500: " + meta.title);
       }
+    });
+
+    for (const meta of metaJson) {
       if (linkListJson[meta.category] == null) {
         linkListJson[meta.category] = { active: [], lost: [] };
       }
@@ -212,12 +242,10 @@ async function fetchFeed(url) {
       opmlXmlContentEd;
     fs.writeFileSync(opmlXmlPath, opmlXmlContent, { encoding: "utf-8" });
 
-    // 用于存储各项数据
-    dataJson = [];
-
-    for (const lineJson of metaJson) {
+    // 并发抓取 Feed，但限制并发数，避免对上游造成突发压力。
+    const feedItems = await mapWithConcurrency(metaJson, 6, async (lineJson) => {
       if (lineJson.xmlUrl == "") {
-        continue;
+        return [];
       }
 
       try {
@@ -228,13 +256,18 @@ async function fetchFeed(url) {
           console.log("xmlUrl: " + lineJson.xmlUrl);
 
           // 数组合并
-          dataJson.push.apply(
-            dataJson,
-            feed.items
-              .filter((item) => item.title)
-              .map((item) => {
-                const pubDate = new Date(item.pubDate ?? item.published);
-                return {
+          return feed.items.flatMap((item) => {
+                if (!item.title || !item.link) {
+                  return [];
+                }
+
+                const pubDate = new Date(item.pubDate ?? item.isoDate ?? item.published);
+                if (Number.isNaN(pubDate.getTime())) {
+                  console.error(`Invalid publication date in ${lineJson.xmlUrl}: ${item.title}`);
+                  return [];
+                }
+
+                return [{
                   name: lineJson.title,
                   xmlUrl: lineJson.xmlUrl,
                   htmlUrl: lineJson.htmlUrl,
@@ -246,14 +279,17 @@ async function fetchFeed(url) {
                   pubDateMMDD: pubDate.toISOString().split("T")[0].slice(5),
                   pubDateYY: pubDate.toISOString().slice(0, 4),
                   pubDateMM: pubDate.toISOString().slice(5, 7),
-                };
-              })
-          );
+                }];
+              });
         }
       } catch (err) {
         console.error(`Failed to fetch URL: ${lineJson.xmlUrl}. Error: ${err.message}`);
       }
-    }
+
+      return [];
+    });
+
+    let dataJson = feedItems.flat();
 
     // 去重
     dataJson = dataJson.filter(
@@ -311,3 +347,4 @@ async function fetchFeed(url) {
     process.exit(1); // 确保工作流检测到失败
   }
 })();
+
