@@ -1,0 +1,7 @@
+/*
+  Access-Control-Allow-Origin: *
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: unsafe-url
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
