@@ -1,14 +1,13 @@
-# TODO: 需修改的配置，用于上传到 CloudFlare.
 name = "blogroll"
-type = "webpack"
 account_id = "0de7ad47f547afcaca7575c5c24ad560"
 workers_dev = true
+compatibility_date = "2026-08-22"
 # route = "blogroll.axz.me/*"
-zone_id = "dac67509f8ab93320c00b66daad8d897"
 
-[site]
-bucket = "./web/dist"
-entry-point = "workers-site"
+[assets]
+directory = "./web/dist"
+not_found_handling = "single-page-application"
 
 [observability.logs]
-enabled = false
+enabled = true
+
