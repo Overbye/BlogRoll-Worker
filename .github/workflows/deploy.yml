@@ -3,47 +3,39 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
   schedule:
-    - cron: "0 4,16 * * *"
+    # 避开整点的 GitHub Actions 调度高峰；时间为 UTC。
+    - cron: "17 4,16 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: blogroll-production
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version:
-          - 18.x
+    timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
+      - name: Use Node.js
+        uses: actions/setup-node@v6
         with:
-          # 令 GitHub 在 git clone 和 git checkout 后「忘记」使用的 credentials。
-          # 如果之后需要以另外的身份（如你的 GitHub Bot）执行 git push 操作时（如部署到 GitHub Pages），必须设置为 false。
-          persist-credentials: false
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      # 缓存 node_modules，缓存机制参见 GitHub 文档：https://help.github.com/en/actions/configuring-and-managing-workflows/caching-dependencies-to-speed-up-workflows
-      - name: Cache node_modules
-        uses: actions/cache@v3 # 使用 GitHub 官方的缓存 Action。
-        env:
-          cache-name: blogroll-node-modules
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('package-lock.json') }} # 使用 package-lock.json 的 Hash 作为缓存的 key。也可以使用 package.json 代替
-      # Wrangler 在构建时会在 workers-site 目录下执行 npm i，因此也要缓存这里的 node_modules
-      - name: Cache workers-site/node_modules
-        uses: actions/cache@v3
-        env:
-          cache-name: workers-site-node-modules
-        with:
-          path: workers-site/node_modules
-          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('workers-site/package-lock.json') }}
-      - run: npm i # 执行 Blogroll 的依赖安装
-      - run: npm run gen # 相当于 node index.js，生成 opml.xml，opml.json 和 data.json
-      - run: npm run build
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Generate RSS data
+        run: npm run gen
+      - name: Build site
+        run: npm run build
       - name: Deploy to Cloudflare Workers
-        uses: cloudflare/wrangler-action@2.0.0
+        uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CF_WORKERS_TOKEN }}
-          # Wrangler Action 也支持使用传统的 Global API Token + Email 的鉴权方式，但不推荐
+          command: deploy
+
