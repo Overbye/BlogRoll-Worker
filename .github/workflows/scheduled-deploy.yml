@@ -1,9 +1,10 @@
-name: Deploy
+name: Scheduled Deploy
+
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
+  schedule:
+    # 临时提高频率以验证新的 GitHub 定时触发器；验证后恢复为每天两次。
+    - cron: "*/5 * * * *"
 
 permissions:
   contents: read
@@ -35,4 +36,3 @@ jobs:
         with:
           apiToken: ${{ secrets.CF_WORKERS_TOKEN }}
           command: deploy
-
