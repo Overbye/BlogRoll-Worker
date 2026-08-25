@@ -5,8 +5,8 @@ on:
       - main
   workflow_dispatch:
   schedule:
-    # 避开整点的 GitHub Actions 调度高峰；时间为 UTC。
-    - cron: "17 4,16 * * *"
+    # 临时提高频率以验证 GitHub 定时触发器已重新注册；验证后恢复。
+    - cron: "*/5 * * * *"
 
 permissions:
   contents: read
