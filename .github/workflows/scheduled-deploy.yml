@@ -3,8 +3,8 @@ name: Scheduled Deploy
 on:
   workflow_dispatch:
   schedule:
-    # 临时提高频率以验证新的 GitHub 定时触发器；验证后恢复为每天两次。
-    - cron: "*/5 * * * *"
+    # 避开整点的 GitHub Actions 调度高峰；时间为 UTC。
+    - cron: "17 4,16 * * *"
 
 permissions:
   contents: read
